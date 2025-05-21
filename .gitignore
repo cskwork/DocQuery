@@ -1,0 +1,10 @@
+.venv
+*.pyc
+__pycache__
+input/
+output/
+node_modules
+*lock.json
+.idea
+.venv_admin
+logs/

@@ -1,0 +1,280 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+h1, h2 {
+    color: #2c3e50;
+}
+.container {
+    display: flex;
+    gap: 30px;
+}
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    flex: 1;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+input[type="file"], button, .btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+button, .btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+button:hover, .btn:hover {
+    background: #2980b9;
+}
+.file-list {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+}
+.search-result {
+    margin-top: 10px;
+    font-weight: normal;
+}
+.result-count {
+    display: inline-block;
+    background: #e0e0e0;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 1em;
+    margin-left: 8px;
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.detail-btn {
+    padding: 3px 8px;
+    font-size: 0.8em;
+    background: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.detail-btn:hover {
+    background: #e0e0e0;
+}
+
+.snippet-container {
+    margin-top: 8px;
+    margin-left: 15px;
+    font-size: 0.9em;
+    max-height: 500px;
+    overflow-y: auto;
+}
+.snippet {
+    padding: 5px;
+    margin: 3px 0;
+    background-color: #f8f9fa;
+    border-left: 3px solid #3498db;
+    border-radius: 0 4px 4px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: monospace;
+}
+.line-number {
+    color: #777;
+    margin-right: 5px;
+    user-select: none;
+    font-size: 0.8em;
+}
+.match-highlight {
+    background-color: #ffeb3b;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+.file-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+.file-item:last-child {
+    border-bottom: none;
+}
+.file-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.drop-area {
+    border: 2px dashed #3498db;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+.drop-area.highlight {
+    background-color: #e3f2fd;
+    border-color: #2980b9;
+}
+.drop-area p {
+    margin: 0;
+    color: #666;
+}
+.file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.file-preview-item {
+    background: #e3f2fd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
+}
+.file-preview-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.match-complete {
+    background-color: #ccffcc; /* Light green */
+    font-weight: bold;
+    padding: 1px 0;
+}
+.match-partial {
+    background-color: #ffffcc; /* Light yellow */
+    padding: 1px 0;
+}
+.snippet .match-highlight {
+    /* This class is no longer directly used for highlighting type,
+       but keeping it in case other styles depend on it or for fallback.
+       Actual type-based styling is done by .match-complete and .match-partial */
+    background-color: transparent;
+    font-weight: normal;
+}
+.snippet-container {
+    border-left: 3px solid #eee;
+    padding-left: 10px;
+    margin-left: 5px; /* Indent snippets slightly */
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+.snippet {
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+.line-number {
+    color: #888;
+    margin-right: 5px;
+}
+.result-count {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    margin-left: 8px;
+}

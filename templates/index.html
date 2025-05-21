@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document to Markdown Convert and Search Keywords</title>
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>Document to Markdown Converter</h1>
+    <!-- <div>
+        <a href="/hwp-viewer" class="btn" style="display: inline-block; padding: 8px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 4px;">HWP 뷰어</a>
+    </div> -->
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert {% if 'success' in messages[0] %}alert-success{% else %}alert-danger{% endif %}">
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="container">
+    <div class="card">
+        <h2>Upload Files</h2>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="upload-form">
+            <div class="form-group">
+                <div class="drop-area" id="drop-area">
+                    <p>파일을 여기에 끌어다 놓거나 클릭하여 선택하세요</p>
+                    <input type="file" id="file" name="file" multiple style="display: none;">
+                </div>
+                <div class="file-preview" id="file-preview"></div>
+            </div>
+            <button type="submit">Upload Files</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>키워드 검색</h2>
+        <div class="form-group">
+            <label for="keyword">검색어 입력</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="keyword" name="keyword" style="flex: 1;">
+                <button id="search-btn" style="width: auto; padding: 10px 20px;">검색</button>
+            </div>
+        </div>
+        <div id="search-results">
+            <h3>검색 결과</h3>
+            <div class="file-list" id="result-list">
+                <p id="no-results">검색 결과가 여기에 표시됩니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Input Files</h2>
+
+        {% if input_files %}
+        <form action="{{ url_for('convert') }}" method="post">
+            <div class="file-list">
+                {% for file in input_files %}
+                <div class="file-item">
+                    <input type="checkbox" id="file-{{ loop.index }}" name="files" value="{{ file }}">
+                    <label for="file-{{ loop.index }}">{{ file }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <button type="submit">Convert Selected Files</button>
+            </div>
+        </form>
+
+        <form action="{{ url_for('convert_all') }}" method="post" style="margin-top: 15px;">
+            <button type="submit">Convert All Files</button>
+        </form>
+        {% else %}
+        <p>No files found in input folder. Upload files or place them directly in the input folder.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 상세보기 모달 -->
+<div id="detail-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">검색 결과 상세보기</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- 상세 검색 결과가 여기에 표시됩니다 -->
+        </div>
+    </div>
+</div>
+<script>
+    // HTML 특수문자를 이스케이프 처리하는 함수
+    function escapeHTML(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // 파일 드래그 앤 드롭 기능 구현
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file');
+        const filePreview = document.getElementById('file-preview');
+
+        // 드롭 영역 클릭 시 파일 선택 다이얼로그 열기
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 파일 선택 시 미리보기 업데이트
+        fileInput.addEventListener('change', () => {
+            updateFilePreview(fileInput.files);
+        });
+
+        // 드래그 이벤트 처리
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 드래그 효과 처리
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        // 파일 드롭 처리
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            // 파일 입력 필드에 드롭된 파일 설정
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFilePreview(files);
+            }
+        }
+
+        // 파일 미리보기 업데이트
+        function updateFilePreview(files) {
+            filePreview.innerHTML = '';
+
+            if (files.length === 0) {
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-preview-item';
+                fileItem.innerHTML = `<span>${escapeHTML(file.name)}</span>`;
+                filePreview.appendChild(fileItem);
+            }
+        }
+    });
+
+    document.getElementById('search-btn').addEventListener('click', function() {
+        const keyword = document.getElementById('keyword').value.trim();
+        if (!keyword) {
+            alert('검색어를 입력해주세요.');
+            return;
+        }
+
+        const resultList = document.getElementById('result-list');
+        resultList.innerHTML = '<p>검색 중...</p>';
+
+        fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'keyword=' + encodeURIComponent(keyword)
+        })
+            .then(response => response.json())
+            .then(data => {
+                resultList.innerHTML = '';
+
+                if (Object.keys(data).length === 0) {
+                    resultList.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                    return;
+                }
+
+                let totalCount = 0;
+
+                // 먼저 모든 파일에서의 총 검색 결과 수 계산
+                for (const filename in data) {
+                    totalCount += data[filename].count;
+                }
+
+                // 총 검색 결과 수 표시
+                const totalResult = document.createElement('div');
+                totalResult.className = 'file-item';
+                totalResult.innerHTML = `<strong>총 검색 결과: ${totalCount}개</strong>`;
+                resultList.appendChild(totalResult);
+
+                // 각 파일별 결과 표시
+                for (const filename in data) {
+                    const fileData = data[filename];
+                    const count = fileData.count;
+
+                    // 파일명과 카운트 표시
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    // 상세보기 버튼으로 모달 열기
+                    fileItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${filename}</strong> 
+                                <span class="result-count">${count}</span>
+                            </div>
+                            <button class="detail-btn" data-filename="${escapeHTML(filename)}">
+                                상세보기
+                            </button>
+                        </div>
+                    `;
+                    resultList.appendChild(fileItem);
+                }
+
+                // 상세보기 버튼에 이벤트 리스너 추가
+                document.querySelectorAll('.detail-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const filename = this.getAttribute('data-filename');
+                        showDetailModal(filename, data[filename]);
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultList.innerHTML = '<p>검색 중 오류가 발생했습니다.</p>';
+            });
+    });
+
+    // 모달 관련 기능
+    const modal = document.getElementById('detail-modal');
+    const closeBtn = document.querySelector('.close');
+
+    // 모달 닫기 버튼 이벤트
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // 상세보기 모달 표시 함수
+    function showDetailModal(filename, fileData) {
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        // 모달 제목 설정
+        modalTitle.textContent = `${filename} (${fileData.count}개 결과)`;
+
+        // 모달 내용 설정
+        modalBody.innerHTML = '';
+
+        // 각 스니펫 표시
+        fileData.snippets.forEach(snippet => {
+            const snippetDiv = document.createElement('div');
+            snippetDiv.className = 'snippet';
+
+            // 줄 번호와 내용을 함께 표시
+            const lineNumber = snippet.line_number;
+            const before = snippet.before;
+            const matched = snippet.matched;
+            const after = snippet.after;
+            const matchType = snippet.match_type; // 'complete' 또는 'partial'
+
+            let matchedHtml;
+            if (matchType === 'complete') {
+                matchedHtml = `<span class="match-complete">${escapeHTML(matched)}</span>`;
+            } else { // 'partial' 또는 undefined (안전 장치)
+                matchedHtml = `<span class="match-partial">${escapeHTML(matched)}</span>`;
+            }
+
+            snippetDiv.innerHTML = `
+                    <span class="line-number">${lineNumber}:</span>
+                    ${escapeHTML(before)}${matchedHtml}${escapeHTML(after)}
+                `;
+
+            modalBody.appendChild(snippetDiv);
+        });
+
+        // 모달 표시
+        modal.style.display = "block";
+    }
+
+    // Enter 키로도 검색 가능하게 설정
+    document.getElementById('keyword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('search-btn').click();
+            e.preventDefault();
+        }
+    });
+</script>
+</body>
+</html>

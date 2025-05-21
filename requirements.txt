@@ -1,0 +1,6 @@
+docling
+flask
+python-dotenv
+click
+jinja2
+psutil

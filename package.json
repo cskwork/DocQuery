@@ -1,0 +1,23 @@
+{
+  "name": "find-doc-content",
+  "version": "1.0.0",
+  "description": "문서 내용 검색 및 분석 도구",
+  "main": "index.js",
+  "scripts": {
+    "install-deps": "npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hwp.js": "0.0.3",
+    "turndown": "^7.2.0",
+    "canvas": "^3.1.0"
+  },
+  "keywords": [
+    "document",
+    "search",
+    "hwp",
+    "converter"
+  ],
+  "author": "",
+  "license": "MIT"
+}
