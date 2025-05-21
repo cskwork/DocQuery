@@ -3,3 +3,4 @@ flask
 python-dotenv
 jinja2
 psutil
+olefile
