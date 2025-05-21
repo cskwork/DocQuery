@@ -1,5 +1,4 @@
 # Document to Markdown Converter
-
 A web application that converts documents from the `input/` folder to Markdown format in the `output/` folder using Docling. The application provides a simple web interface for document conversion and management.
 
 ## ✨ Features
@@ -134,3 +133,5 @@ The application includes a powerful search feature that allows you to:
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
