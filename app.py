@@ -196,4 +196,10 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    host = '0.0.0.0'
+    port = int(os.environ.get('PORT', 5000))  # .env 파일에서 PORT 환경변수 사용
+    # 앱 시작 시 IP:port 정보를 로그에 기록 (파일 및 콘솔)
+    debug_mode = True  # 디버그 모드 기본값 설정
+    log_message = f"Starting application on http://{host}:{port} (Debug: {debug_mode})"
+    app.logger.info(log_message)
+    app.run(host=host, port=port, debug=debug_mode)

@@ -54,8 +54,15 @@ if not exist output mkdir output
 echo Starting the application...
 set FLASK_APP=app.py
 set FLASK_ENV=development
+set FLASK_DEBUG=1
 
-flask run
+for /f "tokens=1,2 delims==" %%a in (.env) do (
+    if "%%a"=="PORT" set PORT=%%b
+)
+if not defined PORT set PORT=5000
+
+echo [DocQuery] Starting application on http://127.0.0.1:%PORT% (Debug: True)
+flask run --host=0.0.0.0 --port=%PORT% --debug
 
 :: Keep the window open if there's an error
 if %ERRORLEVEL% NEQ 0 (
