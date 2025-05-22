@@ -4,7 +4,7 @@
 set -e
 
 echo "Starting deployment..."
-
+e
 # Create necessary directories if they don't exist
 mkdir -p input output logs
 
