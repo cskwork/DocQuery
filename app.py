@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, jsonify, send_file, Response, request
+from flask import Flask, jsonify, send_from_directory, Response, request
 
 from models.file_handler import FileHandler
 from services.converter_service import ConverterService
@@ -189,7 +189,7 @@ def create_app():
     @app.route('/node_modules/<path:filename>')
     def serve_node_modules(filename):
         node_modules_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'node_modules')
-        return send_file(os.path.join(node_modules_path, filename))
+        return send_from_directory(node_modules_path, filename)
     
     return app
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
     host = '0.0.0.0'
     port = int(os.environ.get('PORT', 5000))  # .env 파일에서 PORT 환경변수 사용
     # 앱 시작 시 IP:port 정보를 로그에 기록 (파일 및 콘솔)
-    debug_mode = True  # 디버그 모드 기본값 설정
+    debug_mode = False  # 디버그 모드 기본값 설정
     log_message = f"Starting application on http://{host}:{port} (Debug: {debug_mode})"
     app.logger.info(log_message)
     app.run(host=host, port=port, debug=debug_mode)
